@@ -1,13 +1,14 @@
-// pages/api/countries.js
-import db from '../database';
+import pool from '../database';
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
-      // Fetch unique countries from the database
-      const countries = db.prepare('SELECT DISTINCT * FROM countries').all();
-      res.status(200).json(countries);
+      const connection = await pool.getConnection();
+      const [rows] = await connection.query('SELECT DISTINCT * FROM countries');
+      connection.release();
+      res.status(200).json(rows);
     } catch (error) {
+      console.error(error);
       res.status(500).json({ error: 'Failed to fetch countries' });
     }
   } else {
